@@ -1,17 +1,13 @@
-
 name: Build Electron App
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-
+  build-windows:
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -20,12 +16,36 @@ jobs:
         with:
           node-version: 20
 
-      - run: npm ci
+      - name: Install deps
+        run: npm install
 
-      - run: npm run make
+      - name: Make (Windows)
+        run: npm run make
 
-      - name: Upload artifacts
+      - name: Upload artifacts (Windows)
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.os }}
+          name: windows-make
+          path: out/make/**
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm install
+
+      - name: Make (macOS)
+        run: npm run make
+
+      - name: Upload artifacts (macOS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-make
           path: out/make/**
